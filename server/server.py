@@ -1,14 +1,15 @@
 from flask import Flask
+from productos.routes import productos_bp
+from usuarios.routes import usuarios_bp
 from flask_cors import CORS
+import cx_Oracle
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
-#usuarios API route
-
-@app.route('/usuarios')
-def usuarios():
-    return {'usuarios': ['usuario1', 'usuario2', 'usuario3']}
+# Registrar los blueprints de productos y clientes
+app.register_blueprint(productos_bp)
+app.register_blueprint(usuarios_bp)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

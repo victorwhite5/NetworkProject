@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   MDBContainer,
   MDBCol,
@@ -10,12 +10,42 @@ import {
 } from "mdb-react-ui-kit";
 
 const Login = () => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleUsuario = (e) => {
+    setUsername(e.target.value);
+  };
+
+  const handleContrasena = (e) => {
+    setPassword(e.target.value);
+  };
+
+  const sendData = async () => {
+    try {
+      const body = {
+        username,
+        password,
+      };
+      const response = await fetch("http://localhost:5000/api/datosUsuario", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const json = await response.json();
+      console.log(json);
+      if (json[1]) window.location = "/home";
+    } catch (error) {
+      console.error("Error al mandar los datos del login:", error);
+    }
+  };
+
   return (
     <MDBContainer fluid className="p-3 my-5 h-custom">
       <MDBRow>
         <MDBCol col="10" md="6">
           <img
-            src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
+            src="https://www.si.com/.image/ar_1:1%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cq_auto:good%2Cw_1200/MTc5MDE3MzgxMzUwMjIxMzE5/1179394906.jpg"
             class="img-fluid"
             alt="Sample image"
           />
@@ -24,10 +54,11 @@ const Login = () => {
         <MDBCol col="4" md="6">
           <MDBInput
             wrapperClass="mb-4"
-            label="Email address"
+            label="Usuario"
             id="formControlLg"
-            type="email"
+            type="usuario"
             size="lg"
+            onChange={handleUsuario}
           />
           <MDBInput
             wrapperClass="mb-4"
@@ -35,10 +66,11 @@ const Login = () => {
             id="formControlLg"
             type="password"
             size="lg"
+            onChange={handleContrasena}
           />
 
           <div className="text-center text-md-start mt-4 pt-2">
-            <MDBBtn className="mb-0 px-5" size="lg">
+            <MDBBtn className="mb-0 px-5" size="lg" onClick={sendData}>
               Login
             </MDBBtn>
             <p className="small fw-bold mt-2 pt-1 mb-2">
