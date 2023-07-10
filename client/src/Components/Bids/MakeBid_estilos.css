@@ -1,0 +1,27 @@
+.modal-image {
+  width: 100%;
+  height: 16em;
+  object-fit: cover;
+}
+
+.modal-title {
+  font-family: 'Geologica', sans-serif;
+  font-weight: 800;
+  font-size: 1.4em;
+  text-transform: uppercase;
+}
+
+.modal-subtitle {
+  font-family: 'Geologica', sans-serif;
+  font-weight: 700;
+  font-size: 2em;
+  /* color : white; */
+}
+
+.modal-timer {
+  font-family: 'Geologica', sans-serif;
+  font-weight: 700;
+  font-size: 2.3em;
+  margin: 0;
+  /* color : white; */
+}
