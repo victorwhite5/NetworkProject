@@ -256,12 +256,15 @@ const HomePage = () => {
               {productos.map((producto) => (
                 <CardProductos
                   key={producto.COD_SUB}
+                  subasta={producto.COD_SUB}
                   imagen={producto.IMAGEN_PRO}
                   nombre={producto.NOMBRE_PRO}
                   id={producto.COD_SUB}
                   precio_base={producto.PRECIO_BASE}
                   tiempo={producto.tiempo}
                   porcentaje={producto.PORCENTAJE_SUPERA}
+                  ofertante={producto.ofertante}
+                  monto={producto.monto}
                 ></CardProductos>
               ))}
             </Carousel>

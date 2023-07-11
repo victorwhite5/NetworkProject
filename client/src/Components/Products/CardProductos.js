@@ -22,6 +22,7 @@ const CardProductos = (props) => {
   }, [props.tiempo, tiempoTerminado, showModal]);
 
   const handleShowModal = () => {
+    console.log(props.subasta);
     setShowModal(true);
   };
 
@@ -57,6 +58,9 @@ const CardProductos = (props) => {
         precioBase={props.precio_base}
         porcentaje={props.porcentaje}
         tiempo={props.tiempo}
+        ofertante={props.ofertante}
+        monto={props.monto}
+        subasta={props.subasta}
       />
     </div>
   );

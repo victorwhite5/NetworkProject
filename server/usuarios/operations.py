@@ -1,5 +1,6 @@
 from flask import jsonify, request
 import cx_Oracle
+import threading
 
 
 def convertir_a_json(cursor, rows):
@@ -8,6 +9,15 @@ def convertir_a_json(cursor, rows):
     for row in rows:
         results.append(dict(zip(columns, row)))
     return results
+
+
+def handle_client(client_socket, address):
+    # Función para manejar las solicitudes de los clientes
+    # Aquí se pueden realizar las operaciones necesarias con los datos del cliente
+    # por ejemplo, recibir y enviar mensajes.
+
+    # Cerrar la conexión con el cliente
+    client_socket.close()
 
 
 def get_usuarios(data):
@@ -43,10 +53,13 @@ def get_usuarios(data):
         sesion = False
         for usuario in usuarios:
             if data["username"] == usuario["USUARIO_CLI"] and data["password"] == usuario["CONTRASENA_CLI"]:
+                cod_usuario = usuario["COD_CLI"]
+                cartera = usuario["CARTERA_CLI"]
                 sesion = True
                 break
 
         if sesion:
+
             response = {'message': 'Datos válidos', 'status': 'success'}
         else:
             response = {
@@ -58,7 +71,7 @@ def get_usuarios(data):
         # Cerrar la conexión
         connection.close()
         print(response)
-        return jsonify(response, sesion)
+        return jsonify(response, sesion, cod_usuario, cartera)
 
     except cx_Oracle.Error as error:
         print("Error al conectar a Oracle: ", error)

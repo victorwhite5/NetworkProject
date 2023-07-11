@@ -44,7 +44,7 @@ def create_subasta(producto):
         cursor = connection.cursor()
 
         # Ejecutar la consulta SQL
-        insert_query = "INSERT INTO SUBASTA (precio_base, fecha_inicio, porcentaje_supera, fk_producto) VALUES (:precio_base, SYSDATE, ROUND(DBMS_RANDOM.VALUE * 16 + 5), :cod_pro)"
+        insert_query = "INSERT INTO SUBASTA (precio_base, fecha_inicio, porcentaje_supera, fk_producto) VALUES (:precio_base, SYSDATE, ROUND(DBMS_RANDOM.VALUE * 1 + 11), :cod_pro)"
         cursor.execute(
             insert_query, precio_base=producto["PRECIO_BASE_PRO"], cod_pro=producto["COD_PRO"])
         response = {'message': 'Se crearon nuevas subastas'}
@@ -61,7 +61,6 @@ def create_subasta(producto):
     except cx_Oracle.Error as error:
         print("Error al conectar a Oracle: ", error)
         return jsonify({'message': 'Error al conectar a la base de datos'})
-    ...
 
 
 def get_all_subastas():
@@ -98,6 +97,45 @@ def get_all_subastas():
         # Se mandan al frontend
         with current_app.app_context():
             return subastas
+
+    except cx_Oracle.Error as error:
+        print("Error al conectar a Oracle: ", error)
+        return jsonify({'message': 'Error al conectar a la base de datos'})
+
+
+def update_subasta(subasta_id):
+    # Establecer la conexión
+    username = 'C##REDES'  # Nombre de usuario de la base de datos
+    password = 'REDES'  # Contraseña del usuario
+    host = 'localhost'
+    port = 1522
+    service_name = 'XE'
+
+    try:
+        # Crear la cadena de conexión
+        dsn = cx_Oracle.makedsn(host, port, service_name=service_name)
+
+        # Establecer la conexión
+        connection = cx_Oracle.connect(username, password, dsn)
+        print("Conexión con Oracle establecida")
+
+        # Crear el cursor
+        cursor = connection.cursor()
+
+        # Ejecutar la consulta SQL
+        insert_query = "UPDATE SUBASTA SET FECHA_FIN = SYSDATE WHERE COD_SUB = :id"
+        cursor.execute(
+            insert_query, id=subasta_id)
+        response = {'message': 'Se termino una subasta2'}
+
+        # Cerrar el cursor
+        cursor.close()
+
+        # Cerrar la conexión
+        connection.commit()
+        connection.close()
+        print(response)
+        return jsonify(response)
 
     except cx_Oracle.Error as error:
         print("Error al conectar a Oracle: ", error)

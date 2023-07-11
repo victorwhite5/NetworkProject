@@ -5,6 +5,7 @@ import Timer from "./Timer";
 import "./MakeBid_estilos.css";
 const MakeBid = (props) => {
   const [tiempoAleatorio, setTiempoAleatorio] = useState("");
+  const [monto_oferta, setMonto_Oferta] = useState();
   useEffect(() => {
     const tiempoGenerado = generarTiempoAleatorio();
     setTiempoAleatorio(tiempoGenerado);
@@ -22,6 +23,31 @@ const MakeBid = (props) => {
 
     return `${horas}:${minutos}:${segundos}`;
   }
+  const handleOferta = async (event) => {
+    event.preventDefault();
+    const subasta = props.subasta;
+    const ofertante = props.ofertante;
+    console.log(monto_oferta, subasta, ofertante);
+    try {
+      const body = {
+        monto_oferta,
+        subasta,
+      };
+      const response = await fetch("http://localhost:5000/api/hacerOferta", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const json = await response.json();
+      console.log(json);
+    } catch (error) {
+      console.error("Error al mandar los datos de la oferta:", error);
+    }
+  };
+
+  const handleMonto = (event) => {
+    setMonto_Oferta(event.target.value);
+  };
   return (
     <Modal
       show={props.show}
@@ -31,74 +57,79 @@ const MakeBid = (props) => {
       keyboard={false}
       size="lg"
     >
-      <Modal.Header closeButton>
-        <Modal.Title>
-          <h2 className="modal-title">{props.titulo}</h2>
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <Row className="row row-cols-2">
-          <Col className="">
-            <MDBCardImage
-              className="modal-image"
-              src={`data:image/jpeg;base64,${props.foto}`}
-            />
-          </Col>
-
-          <Col className="d-flex flex-column justify-content-between">
-            <Row className="align-items-center">
-              <h3 className="modal-subtitle">
-                Precio Base: {props.precioBase}$
-              </h3>
-            </Row>
-            <Row className="align-items-center">
-              <h3 className="modal-subtitle">Ultimo BID:200$</h3>
-            </Row>
-            <Row className="align-items-center">
-              <h3 className="modal-subtitle">
-                Minimo Aumento: {props.porcentaje}%
-              </h3>
-            </Row>
-            <Row className="align-items-center">
-              <MDBInput
-                wrapperClass="mb-4"
-                placeholder="Haz tu BID"
-                id="formControlLg"
-                size="lg"
-                type="number"
+      <form onSubmit={handleOferta}>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <h2 className="modal-title">{props.titulo}</h2>
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Row className="row row-cols-2">
+            <Col className="">
+              <MDBCardImage
+                className="modal-image"
+                src={`data:image/jpeg;base64,${props.foto}`}
               />
-            </Row>
-          </Col>
-        </Row>
-      </Modal.Body>
-      <Modal.Footer>
-        <Row
-          className="row row-cols-2"
-          style={{
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "100%",
-            margin: 0,
-          }}
-        >
-          <Col className="d-flex align-items-center">
-            {/* <Timer tiempo={tiempoAleatorio}></Timer> */}
-            <h2 className="modal-timer">{props.tiempo}</h2>
-          </Col>
-          <Col className="d-flex justify-content-end">
-            <Button
-              onClick={props.handleCloseModal}
-              style={{
-                fontSize: "1.29rem",
-                backgroundColor: "#B5915E",
-                border: "none",
-              }}
-            >
-              HACER BID
-            </Button>
-          </Col>
-        </Row>
-      </Modal.Footer>
+            </Col>
+
+            <Col className="d-flex flex-column justify-content-between">
+              <Row className="align-items-center">
+                <h3 className="modal-subtitle">
+                  Precio Base: {props.precioBase}$
+                </h3>
+              </Row>
+              <Row className="align-items-center">
+                <h3 className="modal-subtitle">Ultimo BID:200$</h3>
+              </Row>
+              <Row className="align-items-center">
+                <h3 className="modal-subtitle">
+                  Minimo Aumento: {props.porcentaje}%
+                </h3>
+              </Row>
+              <Row className="align-items-center">
+                <MDBInput
+                  wrapperClass="mb-4"
+                  placeholder="Haz tu BID"
+                  id="formControlLg"
+                  size="lg"
+                  type="number"
+                  onChange={handleMonto}
+                  value={monto_oferta}
+                />
+              </Row>
+            </Col>
+          </Row>
+        </Modal.Body>
+        <Modal.Footer>
+          <Row
+            className="row row-cols-2"
+            style={{
+              justifyContent: "space-between",
+              alignItems: "center",
+              width: "100%",
+              margin: 0,
+            }}
+          >
+            <Col className="d-flex align-items-center">
+              {/* <Timer tiempo={tiempoAleatorio}></Timer> */}
+              <h2 className="modal-timer">{props.tiempo}</h2>
+            </Col>
+            <Col className="d-flex justify-content-end">
+              <Button
+                type="submit"
+                onClick={props.handleCloseModal}
+                style={{
+                  fontSize: "1.29rem",
+                  backgroundColor: "#B5915E",
+                  border: "none",
+                }}
+              >
+                HACER BID
+              </Button>
+            </Col>
+          </Row>
+        </Modal.Footer>
+      </form>
     </Modal>
   );
 };
