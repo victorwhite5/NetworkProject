@@ -67,7 +67,6 @@ if __name__ == '__main__':
         count = 0
         for producto in productos:
             create_subasta(producto)
-            print(count)
 
         subastas = get_all_subastas()
         for subasta in subastas:

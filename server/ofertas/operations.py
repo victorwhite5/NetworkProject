@@ -4,6 +4,7 @@ import io
 from PIL import Image
 import base64
 
+
 def hacer_oferta(data):
     # Establecer la conexión
     username = 'C##REDES'  # Nombre de usuario de la base de datos
