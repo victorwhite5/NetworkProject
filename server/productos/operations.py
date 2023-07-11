@@ -4,6 +4,7 @@ import io
 from PIL import Image
 import base64
 
+
 def convertir_a_json(cursor, rows):
     results = []
     columns = [d[0] for d in cursor.description]
@@ -19,6 +20,7 @@ def convertir_a_json(cursor, rows):
                 row_data.append(value)
         results.append(dict(zip(columns, row_data)))
     return results
+
 
 def get_all_productos():
     # Establecer la conexión
@@ -43,9 +45,7 @@ def get_all_productos():
         # Se buscan todos los productos
         cursor.execute("SELECT * FROM PRODUCTO")
         rows = cursor.fetchall()  # Se obtienen todos en la variable rows
-        print(rows)
         productos = convertir_a_json(cursor, rows)
-        print(productos)
 
         # Cerrar el cursor
         cursor.close()
@@ -53,24 +53,28 @@ def get_all_productos():
         # Cerrar la conexión
         connection.close()
         # Se mandan al frontend
-        return jsonify(productos)
+        return productos
 
     except cx_Oracle.Error as error:
         print("Error al conectar a Oracle: ", error)
         return jsonify({'message': 'Error al conectar a la base de datos'})
     ...
 
+
 def get_producto(product_id):
     # Lógica para obtener un producto específico de la base de datos
     ...
+
 
 def create_producto(product_data):
     # Lógica para crear un nuevo producto en la base de datos
     ...
 
+
 def update_producto(product_id, product_data):
     # Lógica para actualizar un producto existente en la base de datos
     ...
+
 
 def delete_producto(product_id):
     # Lógica para eliminar un producto existente de la base de datos
