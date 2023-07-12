@@ -1,103 +1,3 @@
-// import {
-//   MDBBtn,
-//   MDBCardImage,
-//   MDBContainer,
-//   MDBInput,
-//   MDBModal,
-//   MDBModalBody,
-//   MDBModalContent,
-//   MDBModalDialog,
-//   MDBModalFooter,
-//   MDBModalHeader,
-//   MDBModalTitle,
-// } from "mdb-react-ui-kit";
-// import React, { useEffect, useState } from "react";
-
-// const HomePage = () => {
-//   const [Subastas, setSubastas] = useState([]);
-//   const [showModal, setShowModal] = useState(false);
-//   const [subasta, setsubasta] = useState(false);
-//   const [monto, setMonto] = useState();
-
-//   const toggleModal = (event) => {
-//     console.log(event.target.value);
-//     setsubasta(event.target.value);
-//     setShowModal(!showModal);
-//   };
-
-//   const handleOferta = async () => {
-//     try {
-//       const body = {
-//         monto,
-//         subasta,
-//       };
-//       const response = await fetch("http://localhost:5000/api/hacerOferta", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify(body),
-//       });
-//       const json = await response.json();
-//       console.log(json);
-//     } catch (error) {
-//       console.error("Error al mandar los datos de la oferta:", error);
-//     }
-//   };
-
-//   const handleMonto = (event) => {
-//     setMonto(event.target.value);
-//   };
-
-//   useEffect(() => {
-//     getSubastas();
-//   }, []);
-
-//   return (
-//     <MDBContainer>
-//       {Subastas.map((subasta) => (
-//         <div>
-//           <MDBCardImage src={`data:image/jpeg;base64,${subasta.IMAGEN_PRO}`} />
-//           <MDBBtn
-//             value={subasta.COD_SUB}
-//             onClick={toggleModal}
-//             data-mdb-toggle="modal"
-//             data-mdb-target="#staticBackdrop"
-//           >
-//             Hacer Bid
-//           </MDBBtn>
-//         </div>
-//       ))}
-
-//       <MDBModal show={showModal} setShow={setShowModal} tabIndex="-1">
-//         <MDBModalDialog>
-//           <MDBModalContent>
-//             <MDBModalHeader>
-//               <MDBModalTitle>Modal title</MDBModalTitle>
-//               <MDBBtn
-//                 className="btn-close"
-//                 color="none"
-//                 onClick={toggleModal}
-//               ></MDBBtn>
-//             </MDBModalHeader>
-//             <MDBModalBody>
-//               <MDBInput
-//                 label="Monto"
-//                 id="typeNumber"
-//                 type="number"
-//                 onChange={handleMonto}
-//               />
-//             </MDBModalBody>
-
-//             <MDBModalFooter>
-//               <MDBBtn color="secondary" onClick={toggleModal}>
-//                 Close
-//               </MDBBtn>
-//               <MDBBtn onClick={handleOferta}>Save changes</MDBBtn>
-//             </MDBModalFooter>
-//           </MDBModalContent>
-//         </MDBModalDialog>
-//       </MDBModal>
-//     </MDBContainer>
-
 import React, { useState, useEffect, Fragment } from "react";
 import {
   Card,
@@ -124,19 +24,33 @@ const HomePage = () => {
   const [isLoading, setLoading] = useState(true);
   const [productos, setProductos] = useState([]);
   const [showToast, setShowToast] = useState(false);
-
+  const [datosusuario, setdatosUsuario] = useState();
   const [productoMinuto, setProductoMinuto] = useState("");
   const [productoTerminado, setProductoTerminado] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/obtenerSubastas")
+    async function fetchData() {
+      try {
+        const response = await fetch(
+          "http://192.168.0.37:5000/api/obtenerDatosUsuario"
+        );
+        const jsonData = await response.json();
+        console.log(jsonData);
+        setdatosUsuario(jsonData);
+      } catch (err) {
+        console.log(err.message);
+      }
+    }
+    fetch("http://192.168.0.37:5000/api/obtenerSubastas")
       .then((response) => response.json())
       .then((productos) => {
+        console.log(productos);
+        fetchData();
         const nuevosProductos = productos.map((producto) => {
           const intervalId = setInterval(() => {
             actualizarTiempo(producto.id);
           }, 1000);
-          console.log(productos);
+
           return {
             ...producto,
             intervalId: intervalId,
@@ -146,7 +60,6 @@ const HomePage = () => {
         setProductos(nuevosProductos);
         setLoading(false);
       });
-
     return () => {
       productos.forEach((producto) => {
         clearInterval(producto.intervalId);
@@ -224,6 +137,16 @@ const HomePage = () => {
     backgroundColor: "#B5915E",
   };
 
+  const handleNuevaOferta = (monto_oferta, subasta, ofertante) => {
+    datosusuario.cartera = datosusuario.cartera - monto_oferta;
+    productos.map((producto) => {
+      if (producto.COD_SUB == subasta) {
+        producto.monto = monto_oferta * (1 + producto.PORCENTAJE_SUPERA * 0.01);
+        producto.ofertante = ofertante;
+      }
+    });
+  };
+
   return (
     <Fragment>
       <div style={styles}>
@@ -265,6 +188,9 @@ const HomePage = () => {
                   porcentaje={producto.PORCENTAJE_SUPERA}
                   ofertante={producto.ofertante}
                   monto={producto.monto}
+                  usuario={datosusuario?.cod}
+                  cartera={datosusuario?.cartera}
+                  handleNuevaOferta={handleNuevaOferta}
                 ></CardProductos>
               ))}
             </Carousel>

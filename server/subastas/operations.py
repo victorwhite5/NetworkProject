@@ -44,7 +44,7 @@ def create_subasta(producto):
         cursor = connection.cursor()
 
         # Ejecutar la consulta SQL
-        insert_query = "INSERT INTO SUBASTA (precio_base, fecha_inicio, porcentaje_supera, fk_producto) VALUES (:precio_base, SYSDATE, ROUND(DBMS_RANDOM.VALUE * 1 + 11), :cod_pro)"
+        insert_query = "INSERT INTO SUBASTA (precio_base, fecha_inicio, porcentaje_supera, fk_producto) VALUES (:precio_base, SYSDATE, TRUNC(DBMS_RANDOM.VALUE(1, 13)), :cod_pro)"
         cursor.execute(
             insert_query, precio_base=producto["PRECIO_BASE_PRO"], cod_pro=producto["COD_PRO"])
         response = {'message': 'Se crearon nuevas subastas'}

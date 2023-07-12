@@ -1,4 +1,5 @@
-from flask import Flask
+from flask import Flask, request
+from flask_socketio import SocketIO, emit, join_room
 from productos.routes import productos_bp
 from usuarios.routes import usuarios_bp
 from subastas.routes import subastas_bp
@@ -18,6 +19,8 @@ import os
 import socket
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
 # Registrar los blueprints de productos y clientes
@@ -58,9 +61,55 @@ def restar_un_segundo(producto):
     # Aquí puedes realizar alguna acción adicional cuando el tiempo del producto se agote
 
 
+@socketio.on('connect')
+def on_connect():
+    print('Client connected')
+
+
+@socketio.on('disconnect')
+def on_disconnect():
+    print('Client disconnected')
+
+
+@socketio.on('join_room')
+def on_join_room(data):
+    room_name = data['room']
+    join_room(room_name)
+    print(f"Usuario unido a la sala: {room_name}")
+
+
 @app.route('/api/obtenerSubastas')
 def obtener_subastas():
     return subastas
+
+
+@app.route('/api/obtenerDatosUsuario', methods=['GET'])
+def obtener_datos():
+    return datos_usuario
+
+
+@app.route('/api/hilo_usuario', methods=['POST'])
+def crearHilo():
+    global datos_usuario
+    datos_usuario = request.json
+    user_id = request.json['usuario']
+    room_name = 'DinhoSubastas'
+    socketio.emit('join_room', {'room': room_name})
+    response = {'message': 'hilo creado con exito'}
+    print(datos_usuario)
+
+    # Crear un hilo para el usuario
+    t = threading.Thread(target=funcion_hilo_usuario, args=(user_id,))
+    t.daemon = True
+    t.start()
+    return response
+
+
+def funcion_hilo_usuario(room_name):
+    # Código para el hilo
+
+    # Enviar un mensaje al cliente a través de la sala WebSocket
+    socketio.emit('message', 'Hola desde el hilo ', room=room_name)
 
 
 if __name__ == '__main__':
@@ -76,12 +125,14 @@ if __name__ == '__main__':
         for subasta in subastas:
             subasta['tiempo'] = generarTiempoAleatorio()
             subasta['ofertante'] = None
-            subasta['monto'] = None
+            subasta['monto'] = subasta["PRECIO_BASE"]
             print(subasta)
             t = threading.Thread(target=restar_un_segundo, args=(subasta,))
             threads.append(t)
             t.daemon = True
             t.start()
+
+            # Crear un hilo para el usuario
 
         # Agregar un manejador de señales para capturar la señal SIGINT (Ctrl+C)
         def detenerHilos(signal, frame, threads):
@@ -97,36 +148,5 @@ if __name__ == '__main__':
         signal.signal(signal.SIGINT, lambda signal,
                       frame: detenerHilos(signal, frame, threads))
 
-# Crear un socket de escucha. AF_INET define que se usa IPV4 y SOCK_STREAM: define un
-# tipo de socket orientado a conexión que proporciona una conexión bidireccional entre dos procesos
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-# Configurar el socket para permitir reutilizar la dirección
-server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-# Configurar la dirección y el puerto del servidor
-server_address = ('192.168.0.37', 1234)
-
-# Vincular el socket a la dirección y el puerto del servidor
-server_socket.bind(server_address)
-
-# Permitir hasta 5 conexiones pendientes
-server_socket.listen(5)
-
-print(f"Servidor escuchando en {server_address[0]}:{server_address[1]}")
-
-# Ciclo principal para manejar las conexiones entrantes
-while True:
-    # Esperar por una conexión entrante
-    print("Esperando por una conexión entrante...")
-    client_socket, client_address = server_socket.accept()
-
-    # Crear un nuevo hilo para manejar la conexión entrante
-    print(f"Conexión entrante desde {client_address[0]}:{client_address[1]}")
-    t = threading.Thread(target=handle_client, args=(
-        client_socket, client_address))
-    t.daemon = True
-    t.start()
-
     # Iniciar la aplicación Flask
-    app.run(debug=True)
+    socketio.run(app, host='192.168.0.37', port=5000)

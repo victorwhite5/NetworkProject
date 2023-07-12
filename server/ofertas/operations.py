@@ -29,7 +29,7 @@ def hacer_oferta(data):
         print(data)
 
         # Ejecutar la consulta SQL
-        insert_query = "INSERT INTO OFERTA (MONTO_OFERTA, fk_subasta, fk_cliente) VALUES (:monto, :subasta, 1)"
+        insert_query = "INSERT INTO OFERTA (MONTO_OFERTA, fk_subasta, fk_cliente) VALUES (:monto_oferta, :subasta, :ofertante)"
         cursor.execute(insert_query, data)
         response = {'message': 'Oferta realizada con éxito'}
 
@@ -37,6 +37,7 @@ def hacer_oferta(data):
         cursor.close()
 
         # Cerrar la conexión
+        connection.commit()
         connection.close()
         print(response)
         return jsonify(response)

@@ -25,15 +25,29 @@ const MakeBid = (props) => {
   }
   const handleOferta = async (event) => {
     event.preventDefault();
+    if (props.ofertante) {
+      if (monto_oferta < props.monto * props.porcentaje) {
+        console.log("la oferta realiza no es suficiente");
+        return;
+      } else if (props.ofertante == props.usuario) {
+        console.log("El ofertante actual es " || props.nombre);
+        return;
+      }
+    } else if (monto_oferta < props.monto) {
+      console.log("la oferta realiza no es suficiente");
+      return;
+    }
     const subasta = props.subasta;
-    const ofertante = props.ofertante;
+    const ofertante = props.usuario;
     console.log(monto_oferta, subasta, ofertante);
+    props.handleNuevaOferta(monto_oferta, subasta, ofertante);
     try {
       const body = {
         monto_oferta,
         subasta,
+        ofertante,
       };
-      const response = await fetch("http://localhost:5000/api/hacerOferta", {
+      const response = await fetch("http://192.168.0.37:5000/api/hacerOferta", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -79,11 +93,19 @@ const MakeBid = (props) => {
                 </h3>
               </Row>
               <Row className="align-items-center">
-                <h3 className="modal-subtitle">Ultimo BID:200$</h3>
+                <p className="modal-subtitle">Bid actual: {props.monto}</p>
+              </Row>
+              <Row className="align-items-center">
+                <p className="modal-subtitle">Por: {props.ofertante}</p>
               </Row>
               <Row className="align-items-center">
                 <h3 className="modal-subtitle">
                   Minimo Aumento: {props.porcentaje}%
+                </h3>
+              </Row>
+              <Row className="align-items-center">
+                <h3 className="modal-subtitle">
+                  Proximo Bid: {props.monto * (1 + props.porcentaje * 0.01)} $
                 </h3>
               </Row>
               <Row className="align-items-center">

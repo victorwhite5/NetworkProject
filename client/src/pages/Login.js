@@ -27,14 +27,40 @@ const Login = () => {
         username,
         password,
       };
-      const response = await fetch("http://localhost:5000/api/datosUsuario", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+      const response = await fetch(
+        "http://192.168.0.37:5000/api/datosUsuario",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }
+      );
       const json = await response.json();
       console.log(json);
-      if (json[1]) window.location = "/home";
+      if (json[1]) {
+        const cod = json[2].COD_CLI;
+        const nombre = json[2].NOMBRE_CLI;
+        const usuario = json[2].USUARIO_CLI;
+        const cartera = json[2].CARTERA_CLI;
+        const ip = json[3];
+        try {
+          const body = {
+            cod,
+            nombre,
+            usuario,
+            cartera,
+            ip,
+          };
+          fetch("http://192.168.0.37:5000/api/hilo_usuario", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+        } catch (error) {
+          console.error("Error al intentar crear el hilo", error);
+        }
+        window.location = "/home";
+      }
     } catch (error) {
       console.error("Error al mandar los datos del login:", error);
     }

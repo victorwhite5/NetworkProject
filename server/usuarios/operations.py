@@ -53,14 +53,14 @@ def get_usuarios(data):
         sesion = False
         for usuario in usuarios:
             if data["username"] == usuario["USUARIO_CLI"] and data["password"] == usuario["CONTRASENA_CLI"]:
-                cod_usuario = usuario["COD_CLI"]
-                cartera = usuario["CARTERA_CLI"]
+                usuario_actual = usuario
                 sesion = True
                 break
 
         if sesion:
-
-            response = {'message': 'Datos válidos', 'status': 'success'}
+            print(request.remote_addr)
+            response = {'message': 'Datos válidos',
+                        'status': 'success', 'ip': request.remote_addr}
         else:
             response = {
                 'message': 'Usuario o contraseña inválidos', 'status': 'failed'}
@@ -71,7 +71,7 @@ def get_usuarios(data):
         # Cerrar la conexión
         connection.close()
         print(response)
-        return jsonify(response, sesion, cod_usuario, cartera)
+        return jsonify(response, sesion, usuario_actual, request.remote_addr)
 
     except cx_Oracle.Error as error:
         print("Error al conectar a Oracle: ", error)

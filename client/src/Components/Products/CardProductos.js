@@ -38,7 +38,7 @@ const CardProductos = (props) => {
       <div className="card">
         <MDBCardImage src={`data:image/jpeg;base64,${props.imagen}`} />
         <h2 className=" mt-3">{props.nombre}</h2>
-        <p className="price">{props.precio_base}</p>
+        <p className="price">{props.monto}</p>
         <p>{props.description}</p>
         <p>
           {/* <button onClick={handleShowModal}>Haz un BID</button> */}
@@ -61,6 +61,9 @@ const CardProductos = (props) => {
         ofertante={props.ofertante}
         monto={props.monto}
         subasta={props.subasta}
+        usuario={props.usuario}
+        cartera={props.cartera}
+        handleNuevaOferta={props.handleNuevaOferta}
       />
     </div>
   );
