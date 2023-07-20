@@ -28,7 +28,7 @@ const Login = () => {
         password,
       };
       const response = await fetch(
-        "http://192.168.0.37:5000/api/datosUsuario",
+        "http://192.168.0.127:5000/api/datosUsuario",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -51,7 +51,7 @@ const Login = () => {
             cartera,
             ip,
           };
-          fetch("http://192.168.0.37:5000/api/hilo_usuario", {
+          fetch("http://192.168.0.127:5000/api/hilo_usuario", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),

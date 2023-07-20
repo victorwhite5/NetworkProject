@@ -103,7 +103,7 @@ def get_all_subastas():
         return jsonify({'message': 'Error al conectar a la base de datos'})
 
 
-def update_subasta(subasta_id):
+def terminar_subasta(subasta):
     # Establecer la conexión
     username = 'C##REDES'  # Nombre de usuario de la base de datos
     password = 'REDES'  # Contraseña del usuario
@@ -123,9 +123,10 @@ def update_subasta(subasta_id):
         cursor = connection.cursor()
 
         # Ejecutar la consulta SQL
-        insert_query = "UPDATE SUBASTA SET FECHA_FIN = SYSDATE WHERE COD_SUB = :id"
+        update_query = "UPDATE SUBASTA SET FECHA_FIN = SYSDATE, GANANCIA_MARTILLERO = :monto * 0.15, PRECIO_FINAL_SUB = :monto WHERE COD_SUB = :id"
         cursor.execute(
-            insert_query, id=subasta_id)
+            update_query, id=subasta['COD_SUB'], monto=subasta['monto'])
+        print(f'SE ACTUALIZO LA SUBASTA CON: {subasta["COD_SUB"]}')
         response = {'message': 'Se termino una subasta2'}
 
         # Cerrar el cursor

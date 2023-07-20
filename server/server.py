@@ -8,8 +8,8 @@ from flask_cors import CORS
 from productos.operations import get_all_productos
 from subastas.operations import create_subasta
 from subastas.operations import get_all_subastas
-from subastas.operations import update_subasta
 from usuarios.operations import handle_client
+from subastas.operations import terminar_subasta
 import cx_Oracle
 import random
 import threading
@@ -54,9 +54,9 @@ def restar_un_segundo(producto):
         time.sleep(1)
         producto['tiempo'] = restar_segundo(producto['tiempo'])
     with app.app_context():
-        update_subasta(producto['COD_SUB'])
+        terminar_subasta(producto)
         print(
-            f"La subasta por el producto: {producto['NOMBRE_PRO']} se ha terminado terminado")
+            f"La subasta por el producto: {producto['NOMBRE_PRO']} se ha terminado terminado, la ha ganado {producto['ofertante']}, por un monto final de: {producto['monto']}")
     # threading.current_thread()._stop()
     # Aquí puedes realizar alguna acción adicional cuando el tiempo del producto se agote
 
@@ -85,6 +85,20 @@ def obtener_subastas():
 
 @app.route('/api/obtenerDatosUsuario', methods=['GET'])
 def obtener_datos():
+    return datos_usuario
+
+
+@app.route('/api/actualizarDatosSubasta', methods=['POST'])
+def actualizar_subasta():
+    print('EN ACTUALIZAR SUBASTA')
+    print(request.json)
+    for subasta in subastas:
+        if (subasta['COD_SUB'] == request.json['subasta']):
+            print('ENCONTRO LA SUBASTA Y VA A ACTUALIZAR')
+            subasta['monto'] = request.json['monto_oferta']
+            subasta['ofertante'] = request.json['ofertante']
+            print(
+                f"La oferta por: {subasta['COD_SUB']} fue realizada por el ofertante {subasta['ofertante']}, por un monto de {subasta['monto']}")
     return datos_usuario
 
 
@@ -149,4 +163,4 @@ if __name__ == '__main__':
                       frame: detenerHilos(signal, frame, threads))
 
     # Iniciar la aplicación Flask
-    socketio.run(app, host='192.168.0.37', port=5000)
+    socketio.run(app, host='192.168.0.127', port=5000)
