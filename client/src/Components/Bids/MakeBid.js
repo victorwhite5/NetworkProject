@@ -47,11 +47,14 @@ const MakeBid = (props) => {
         subasta,
         ofertante,
       };
-      const response = await fetch("http://192.168.0.39:5000/api/hacerOferta", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+      const response = await fetch(
+        "http://192.168.0.127:5000/api/hacerOferta",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }
+      );
       const json = await response.json();
       console.log(json);
     } catch (error) {
@@ -64,7 +67,7 @@ const MakeBid = (props) => {
         ofertante,
       };
       const response = await fetch(
-        "http://192.168.0.39:5000/api/actualizarDatosSubasta",
+        "http://192.168.0.127:5000/api/actualizarDatosSubasta",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

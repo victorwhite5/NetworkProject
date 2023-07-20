@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit, join_room
 from productos.routes import productos_bp
 from usuarios.routes import usuarios_bp
@@ -47,7 +47,10 @@ def restar_segundo(tiempo):
 
 def restar_un_segundo(producto):
     global mi_subasta
+    while not inicio:
+        time.sleep(1)
     mi_subasta = producto
+    print('Empezó la subasta')
     while producto['tiempo'] != '00:00:00':
         time.sleep(1)
         producto['tiempo'] = restar_segundo(producto['tiempo'])
@@ -59,31 +62,9 @@ def restar_un_segundo(producto):
     # Aquí puedes realizar alguna acción adicional cuando el tiempo del producto se agote
 
 
-@socketio.on('connect')
-def on_connect():
-    print('Client connected')
-
-
-@socketio.on('disconnect')
-def on_disconnect():
-    print('Client disconnected')
-
-
-@socketio.on('join_room')
-def on_join_room(data):
-    room_name = data['room']
-    join_room(room_name)
-    print(f"Usuario unido a la sala: {room_name}")
-
-
 @app.route('/api/obtenerSubastas')
 def obtener_subastas():
     return subastas
-
-
-@app.route('/api/obtenerDatosUsuario', methods=['GET'])
-def obtener_datos():
-    return datos_usuario
 
 
 @app.route('/api/actualizarDatosSubasta', methods=['POST'])
@@ -97,34 +78,109 @@ def actualizar_subasta():
             subasta['ofertante'] = request.json['ofertante']
             print(
                 f">S Producto: {subasta['NOMBRE_PRO']}, reicibio una oferta por: {subasta['monto']}, por: {mi_usuario['cod']} = {request.json['ofertante']}")
+    return
+
+
+inicio = False
+
+
+@app.route('/api/inicio', methods=['POST'])
+def actualizar_inicio():
+    print('llegó a inicio')
+    global inicio
+    inicio = True
+    return inicio
+
+
+def handle_client(client_socket, client_address, cod, nombre, usuario, cartera, ip):
+    try:
+        # Implementa aquí la lógica para manejar las solicitudes del cliente
+        print('Este es el hilo de: ', nombre)
+        print('los datos de: ', nombre, 'son: ', cod, usuario, cartera, ip)
+
+        local_ip, local_port = client_socket.getsockname()
+        print(
+            f"El cliente está recibiendo datos en el puerto local {local_port}")
+
+        # Recibir y procesar los datos del cliente
+        while True:
+            hilos_activos = threading.enumerate()
+            for hilo in hilos_activos:
+                print(f"Nombre: {hilo.name}")
+            print('salio del for')
+            data = client_socket.recv(1024)
+            print('paso el data')
+            if not data:
+                print('Se cerró la conexión')
+                break
+            print('pasó el IF')
+
+            # Procesar los datos recibidos del cliente, si es necesario
+
+            # Enviar una respuesta al cliente (opcional)
+            # client_socket.send(b"Mensaje recibido")
+        print('salió del while true')
+    except Exception as e:
+        print(
+            f"Error al manejar cliente {client_address[0]}:{client_address[1]}", e)
+    finally:
+        # Cerrar la conexión con el cliente
+        print('desconectó el hilo')
+        client_socket.close()
+
+
+@app.route('/api/obtenerDatosUsuario', methods=['GET'])
+def obtener_datos():
     return datos_usuario
 
 
-def funcion_hilo_usuario(datos_usuario):
-    # Código para el hilo
-    print(
-        f">C Usuario: {datos_usuario['nombre']}. Cartera: {datos_usuario['cartera']}. ID = {datos_usuario['usuario']}")
-    global mi_usuario
-    mi_usuario = datos_usuario
-    # Enviar un mensaje al cliente a través de la sala WebSocket
-    # socketio.emit('message', 'Hola desde el hilo ', room=room_name)
+@socketio.on('connect')
+def test_connect():
+    emit('conectado')
+
+
+@socketio.on('disconnect')
+def test_disconnect():
+    emit('client disconnected')
+
+
+@socketio.on('message')
+def test_data(data):
+    emit(data)
 
 
 @app.route('/api/hilo_usuario', methods=['POST'])
-def crearHilo():
-    global datos_usuario
-    datos_usuario = request.json
-    room_name = 'DinhoSubastas'
-    socketio.emit('join_room', {'room': room_name})
-    response = {'message': 'hilo creado con exito'}
+def handle_hilo_usuario():
+    try:
+        data = request.get_json()
+        global datos_usuario
+        datos_usuario = data
+        cod = data['cod']
+        nombre = data['nombre']
+        usuario = data['usuario']
+        cartera = data['cartera']
+        ip = data['ip']
+        # Crear un socket para manejar la conexión del cliente
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # Reemplaza el puerto (12345) con el puerto correcto para tu servidor
+        client_socket.connect(('192.168.0.127', 5000))
+        # Crear un hilo para manejar la conexión del cliente
+        client_thread = threading.Thread(
+            target=handle_client, name=usuario, args=(client_socket, ip, cod, nombre, usuario, cartera, ip))
+        client_thread.start()
+        print('Creó el hilo correctamente')
+        # Responder al frontend que la solicitud fue recibida correctamente.
+        return jsonify({'message': 'Solicitud recibida correctamente'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-    # Crear un hilo para el usuario
-    global usuario
-    usuario = threading.Thread(
-        target=funcion_hilo_usuario, args=(datos_usuario,))
-    usuario.daemon = True
-    usuario.start()
-    return response
+
+def main():
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind(('192.168.0.127', 5000))
+    server_socket.listen(5)
+
+    print("Servidor en espera de conexiones...")
 
 
 if __name__ == '__main__':
@@ -144,26 +200,13 @@ if __name__ == '__main__':
             subasta['ofertante'] = None
             subasta['monto'] = subasta["PRECIO_BASE"]
             global t
-            t = threading.Thread(target=restar_un_segundo, args=(subasta,))
+            t = threading.Thread(target=restar_un_segundo,
+                                 name=subasta['COD_SUB'], args=(subasta,))
             threads.append(t)
-            t.daemon = True
             t.start()
 
             # Crear un hilo para el usuario
-
-        # Agregar un manejador de señales para capturar la señal SIGINT (Ctrl+C)
-        def detenerHilos(signal, frame, threads):
-            print("Deteniendo hilos secundarios...")
-            for thread in threads:
-                thread.stop()
-            # Salir de la aplicación Flask
-            print("Hilos secundarios detenidos. Saliendo...")
-            # sys.exit(0)
-            os._exit(0)
-
-        # signal.signal(signal.SIGINT, detenerHilos)
-        signal.signal(signal.SIGINT, lambda signal,
-                      frame: detenerHilos(signal, frame, threads))
+    main()
 
     # Iniciar la aplicación Flask
-    socketio.run(app, host='192.168.0.39', port=5000)
+    socketio.run(app, host='192.168.0.127', port=5000)

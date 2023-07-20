@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import ContextSocket from "../context/context-socketio";
 import {
   MDBContainer,
   MDBCol,
@@ -21,6 +22,13 @@ const Login = () => {
     setPassword(e.target.value);
   };
 
+  function mandarData() {
+    const Socket = useContext(ContextSocket);
+    function sendMessage() {
+      Socket.emit("message", "Hola Nelson");
+    }
+  }
+
   const sendData = async () => {
     try {
       const body = {
@@ -28,7 +36,7 @@ const Login = () => {
         password,
       };
       const response = await fetch(
-        "http://192.168.0.39:5000/api/datosUsuario",
+        "http://192.168.0.127:5000/api/datosUsuario",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -51,7 +59,7 @@ const Login = () => {
             cartera,
             ip,
           };
-          fetch("http://192.168.0.39:5000/api/hilo_usuario", {
+          fetch("http://192.168.0.127:5000/api/hilo_usuario", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
@@ -96,7 +104,7 @@ const Login = () => {
           />
 
           <div className="text-center text-md-start mt-4 pt-2">
-            <MDBBtn className="mb-0 px-5" size="lg" onClick={sendData}>
+            <MDBBtn className="mb-0 px-5" size="lg" onClick={mandarData}>
               Login
             </MDBBtn>
             <p className="small fw-bold mt-2 pt-1 mb-2">
