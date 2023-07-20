@@ -32,7 +32,7 @@ const HomePage = () => {
     async function fetchData() {
       try {
         const response = await fetch(
-          "http://192.168.0.127:5000/api/obtenerDatosUsuario"
+          "http://192.168.0.39:5000/api/obtenerDatosUsuario"
         );
         const jsonData = await response.json();
         console.log(jsonData);
@@ -41,7 +41,7 @@ const HomePage = () => {
         console.log(err.message);
       }
     }
-    fetch("http://192.168.0.127:5000/api/obtenerSubastas")
+    fetch("http://192.168.0.39:5000/api/obtenerSubastas")
       .then((response) => response.json())
       .then((productos) => {
         console.log(productos);

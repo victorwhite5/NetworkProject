@@ -25,18 +25,18 @@ const MakeBid = (props) => {
   }
   const handleOferta = async (event) => {
     event.preventDefault();
-    if (props.ofertante) {
-      if (monto_oferta < props.monto * props.porcentaje) {
-        console.log("la oferta realiza no es suficiente");
-        return;
-      } else if (props.ofertante == props.usuario) {
-        console.log("El ofertante actual es " || props.nombre);
-        return;
-      }
-    } else if (monto_oferta < props.monto) {
-      console.log("la oferta realiza no es suficiente");
-      return;
-    }
+    // if (props.ofertante) {
+    //   if (monto_oferta < props.monto * props.porcentaje) {
+    //     console.log("la oferta realiza no es suficiente");
+    //     return;
+    //   } else if (props.ofertante == props.usuario) {
+    //     console.log("El ofertante actual es " || props.nombre);
+    //     return;
+    //   }
+    // } else if (monto_oferta < props.monto) {
+    //   console.log("la oferta realiza no es suficiente");
+    //   return;
+    // }
     const subasta = props.subasta;
     const ofertante = props.usuario;
     console.log(monto_oferta, subasta, ofertante);
@@ -47,14 +47,11 @@ const MakeBid = (props) => {
         subasta,
         ofertante,
       };
-      const response = await fetch(
-        "http://192.168.0.127:5000/api/hacerOferta",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        }
-      );
+      const response = await fetch("http://192.168.0.39:5000/api/hacerOferta", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
       const json = await response.json();
       console.log(json);
     } catch (error) {
@@ -67,7 +64,7 @@ const MakeBid = (props) => {
         ofertante,
       };
       const response = await fetch(
-        "http://192.168.0.127:5000/api/actualizarDatosSubasta",
+        "http://192.168.0.39:5000/api/actualizarDatosSubasta",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

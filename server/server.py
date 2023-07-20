@@ -46,11 +46,9 @@ def restar_segundo(tiempo):
 
 
 def restar_un_segundo(producto):
+    global mi_subasta
+    mi_subasta = producto
     while producto['tiempo'] != '00:00:00':
-        # print(f"Producto: {producto['nombre']} Tiempo: {producto['tiempo']}")
-        if producto['tiempo'] == '00:01:00':
-            print(
-                f"A la subasta por el producto: {producto['NOMBRE_PRO']} le queda 1 minuto!")
         time.sleep(1)
         producto['tiempo'] = restar_segundo(producto['tiempo'])
     with app.app_context():
@@ -90,40 +88,43 @@ def obtener_datos():
 
 @app.route('/api/actualizarDatosSubasta', methods=['POST'])
 def actualizar_subasta():
-    print('EN ACTUALIZAR SUBASTA')
-    print(request.json)
+    # print(request.json)
+    # print(mi_usuario)
+    # print(mi_subasta)
     for subasta in subastas:
         if (subasta['COD_SUB'] == request.json['subasta']):
-            print('ENCONTRO LA SUBASTA Y VA A ACTUALIZAR')
             subasta['monto'] = request.json['monto_oferta']
             subasta['ofertante'] = request.json['ofertante']
             print(
-                f"La oferta por: {subasta['COD_SUB']} fue realizada por el ofertante {subasta['ofertante']}, por un monto de {subasta['monto']}")
+                f">S Producto: {subasta['NOMBRE_PRO']}, reicibio una oferta por: {subasta['monto']}, por: {mi_usuario['cod']} = {request.json['ofertante']}")
     return datos_usuario
+
+
+def funcion_hilo_usuario(datos_usuario):
+    # Código para el hilo
+    print(
+        f">C Usuario: {datos_usuario['nombre']}. Cartera: {datos_usuario['cartera']}. ID = {datos_usuario['usuario']}")
+    global mi_usuario
+    mi_usuario = datos_usuario
+    # Enviar un mensaje al cliente a través de la sala WebSocket
+    # socketio.emit('message', 'Hola desde el hilo ', room=room_name)
 
 
 @app.route('/api/hilo_usuario', methods=['POST'])
 def crearHilo():
     global datos_usuario
     datos_usuario = request.json
-    user_id = request.json['usuario']
     room_name = 'DinhoSubastas'
     socketio.emit('join_room', {'room': room_name})
     response = {'message': 'hilo creado con exito'}
-    print(datos_usuario)
 
     # Crear un hilo para el usuario
-    t = threading.Thread(target=funcion_hilo_usuario, args=(user_id,))
-    t.daemon = True
-    t.start()
+    global usuario
+    usuario = threading.Thread(
+        target=funcion_hilo_usuario, args=(datos_usuario,))
+    usuario.daemon = True
+    usuario.start()
     return response
-
-
-def funcion_hilo_usuario(room_name):
-    # Código para el hilo
-
-    # Enviar un mensaje al cliente a través de la sala WebSocket
-    socketio.emit('message', 'Hola desde el hilo ', room=room_name)
 
 
 if __name__ == '__main__':
@@ -137,10 +138,12 @@ if __name__ == '__main__':
 
         subastas = get_all_subastas()
         for subasta in subastas:
+            print('SUBASTA')
             subasta['tiempo'] = generarTiempoAleatorio()
+            print('tiempo al crear = ', subasta['tiempo'])
             subasta['ofertante'] = None
             subasta['monto'] = subasta["PRECIO_BASE"]
-            print(subasta)
+            global t
             t = threading.Thread(target=restar_un_segundo, args=(subasta,))
             threads.append(t)
             t.daemon = True
@@ -163,4 +166,4 @@ if __name__ == '__main__':
                       frame: detenerHilos(signal, frame, threads))
 
     # Iniciar la aplicación Flask
-    socketio.run(app, host='192.168.0.127', port=5000)
+    socketio.run(app, host='192.168.0.39', port=5000)
