@@ -1,0 +1,12 @@
+.page-container {
+  position: relative;
+  margin-top: 50px; /* Ajusta el valor según tus necesidades */
+}
+
+.fixed-component {
+  position: fixed;
+  top: 0px; /* Ajusta el valor según tus necesidades */
+  right: px; /* Ajusta el valor según tus necesidades */
+  width: 100%;
+  z-index: 999;
+}

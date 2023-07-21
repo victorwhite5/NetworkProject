@@ -20,12 +20,15 @@ import Flayer from "../assets/dinhoofi.png";
 import CardProductos from "../Components/Products/CardProductos";
 import "./Titulo.css";
 import "./Notificacion.css";
+import Wallet from "../Components/Wallet/wallet";
+import "./Wallet.css";
 const HomePage = () => {
   const [isLoading, setLoading] = useState(true);
   const [productos, setProductos] = useState([]);
   const [showToast, setShowToast] = useState(false);
   const [datosusuario, setdatosUsuario] = useState();
   const [productoMinuto, setProductoMinuto] = useState("");
+  const [tipoNotificacion, setTipoNotificacion] = useState("");
   const [productoTerminado, setProductoTerminado] = useState("");
 
   useEffect(() => {
@@ -48,7 +51,7 @@ const HomePage = () => {
         fetchData();
         const nuevosProductos = productos.map((producto) => {
           const intervalId = setInterval(() => {
-            actualizarTiempo(producto.id);
+            actualizarTiempo(producto.COD_SUB);
           }, 1000);
 
           return {
@@ -67,18 +70,47 @@ const HomePage = () => {
     };
   }, []);
 
+  // const actualizarTiempo = (id) => {
+  //   setProductos((prevProductos) =>
+  //     prevProductos.map((producto) => {
+  //       if (producto.id === id) {
+  //         const tiempo = restarUnSegundo(producto.tiempo);
+  //         if (tiempo === "00:01:00") {
+  //           setShowToast(true);
+  //           setProductoMinuto(producto.nombre);
+  //         }
+  //         if (tiempo === "00:00:00") {
+  //           clearInterval(producto.intervalId);
+  //           setProductoTerminado(producto.nombre);
+  //         }
+  //         return {
+  //           ...producto,
+  //           tiempo: tiempo,
+  //         };
+  //       }
+  //       return producto;
+  //     })
+  //   );
+  // };
   const actualizarTiempo = (id) => {
     setProductos((prevProductos) =>
       prevProductos.map((producto) => {
-        if (producto.id === id) {
-          const tiempo = restarUnSegundo(producto.tiempo);
+        if (producto.COD_SUB === id) {
+          let tiempo = "00:00:00";
+          if (producto.tiempo != "00:00:00")
+            tiempo = restarUnSegundo(producto.tiempo);
           if (tiempo === "00:01:00") {
+            setTipoNotificacion("1minuto");
             setShowToast(true);
-            setProductoMinuto(producto.nombre);
+            setProductoMinuto(producto.NOMBRE_PRO);
+            // mostrarNotificacion("1minuto", producto.nombre);
           }
           if (tiempo === "00:00:00") {
             clearInterval(producto.intervalId);
-            setProductoTerminado(producto.nombre);
+            setTipoNotificacion("0minutos");
+            setShowToast(true);
+            setProductoTerminado(producto.NOMBRE_PRO);
+            // mostrarNotificacion("0minutos", producto.nombre);
           }
           return {
             ...producto,
@@ -149,6 +181,12 @@ const HomePage = () => {
 
   return (
     <Fragment>
+      <div className="fixed-component">
+        <Wallet
+          nombre={datosusuario.nombre}
+          cartera={datosusuario.cartera}
+        ></Wallet>
+      </div>
       <div style={styles}>
         <Container style={{ height: "100%" }}>
           <Row
@@ -195,7 +233,7 @@ const HomePage = () => {
               ))}
             </Carousel>
           </Row>
-          <Toast
+          {/* <Toast
             show={showToast}
             onClose={() => setShowToast(false)}
             autohide
@@ -222,6 +260,25 @@ const HomePage = () => {
             </Toast.Header>
             <Toast.Body>
               El tiempo de {productoTerminado} se ha agotado.
+            </Toast.Body>
+          </Toast> */}
+
+          <Toast
+            show={showToast}
+            onClose={() => setShowToast(false)}
+            autohide
+            className="notificacion"
+            stacked
+          >
+            <Toast.Header>
+              <strong className="mr-auto">Notificación</strong>
+            </Toast.Header>
+            <Toast.Body>
+              {tipoNotificacion === "1minuto" ? (
+                <p>El tiempo de {productoMinuto} ha llegado a 1 minuto.</p>
+              ) : (
+                <p>El tiempo de {productoTerminado} se ha agotado.</p>
+              )}
             </Toast.Body>
           </Toast>
         </Container>

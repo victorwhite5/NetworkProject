@@ -36,7 +36,10 @@ const CardProductos = (props) => {
   return (
     <div className="card-container">
       <div className="card">
-        <MDBCardImage src={`data:image/jpeg;base64,${props.imagen}`} />
+        <img
+          src={`data:image/jpeg;base64,${props.imagen}`}
+          className="product--image"
+        />
         <h2 className=" mt-3">{props.nombre}</h2>
         <p className="price">{props.monto}</p>
         <p>{props.description}</p>

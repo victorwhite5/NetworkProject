@@ -1,5 +1,4 @@
-import React, { useContext, useState } from "react";
-import ContextSocket from "../context/context-socketio";
+import React, { useState } from "react";
 import {
   MDBContainer,
   MDBCol,
@@ -21,13 +20,6 @@ const Login = () => {
   const handleContrasena = (e) => {
     setPassword(e.target.value);
   };
-
-  function mandarData() {
-    const Socket = useContext(ContextSocket);
-    function sendMessage() {
-      Socket.emit("message", "Hola Nelson");
-    }
-  }
 
   const sendData = async () => {
     try {
@@ -104,7 +96,7 @@ const Login = () => {
           />
 
           <div className="text-center text-md-start mt-4 pt-2">
-            <MDBBtn className="mb-0 px-5" size="lg" onClick={mandarData}>
+            <MDBBtn className="mb-0 px-5" size="lg" onClick={sendData}>
               Login
             </MDBBtn>
             <p className="small fw-bold mt-2 pt-1 mb-2">

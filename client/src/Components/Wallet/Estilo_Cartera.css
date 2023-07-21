@@ -1,0 +1,42 @@
+.posicion-cartera {
+  position: fixed;
+  width: 100%;
+  z-index: 999;
+}
+
+.cartera {
+  /* cursor: pointer; */
+  font: inherit;
+  border: none;
+  background-color: rgba(77, 49, 11, 0.8);
+  /* background-color: #B5915E; */
+  color: white;
+  /* padding: 0.75rem 3rem; */
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  /* border-radius: 25px; */
+  font-weight: bold;
+}
+
+.titulo-cartera {
+  font-family: "Geologica", sans-serif;
+  font-weight: 500;
+  font-size: 1.3em;
+  color: white;
+}
+
+.subtitulo-cartera {
+  font-family: "Geologica", sans-serif;
+  font-weight: 500;
+  font-size: 1em;
+  /* line-height: 2px; */
+  color: white;
+}
+
+.redondo {
+  background-color: rgba(77, 49, 11, 0.8);
+  /* padding: 0.8rem 1.2rem; */
+  border-radius: 25px;
+  /* margin-left: 1rem; */
+}
